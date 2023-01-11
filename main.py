@@ -2,7 +2,7 @@ import os
 import requests
 from dotenv import load_dotenv
 
-from fastapi import FastAPI, BackgroundTasks
+from fastapi import FastAPI, BackgroundTasks, HTTPException
 from pydantic import BaseModel
 
 from utils.database_connector import DatabaseConnector
@@ -57,18 +57,34 @@ async def root():
 
 @app.post("/weather/", status_code=201)
 async def create_weather_request(background_tasks: BackgroundTasks, user: User):
-    weather_request_exists = db.weather_request_exists(user.user_id)
+    try:
+        weather_request_exists = db.weather_request_exists(user.user_id)
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500)
+
     if weather_request_exists:
         return {'status': 'weather data for this user already exists'}
+    
     background_tasks.add_task(get_weather_data, user.user_id)
+    
     return {'status': 'request to collect weather data was successfully registered'}
 
 
 @app.get("/weather/{user_id}")
 async def read_weather_request_progress(user_id: str):
-    current_weather_data = db.read_weather_request(user_id)
+    try:
+        current_weather_data = db.read_weather_request(user_id)
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500)
+        
+    if not current_weather_data:
+        raise HTTPException(status_code=404, detail="User not found")
+    
     num_progress = current_weather_data[0][-1]
+    
     return {
         "User ID": user_id,
-        "Progress": f'{((num_progress / TOTAL_CITIES) * 100):.2f}%'
+        "Progress": round((num_progress / TOTAL_CITIES) * 100, 2)
     }
