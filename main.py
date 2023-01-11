@@ -55,12 +55,20 @@ async def root():
     return {"Message": "Hello World"}
 
 
-@app.post("/weather/")
+@app.post("/weather/", status_code=201)
 async def create_weather_request(background_tasks: BackgroundTasks, user: User):
+    weather_request_exists = db.weather_request_exists(user.user_id)
+    if weather_request_exists:
+        return {'status': 'weather data for this user already exists'}
     background_tasks.add_task(get_weather_data, user.user_id)
     return {'status': 'request to collect weather data was successfully registered'}
 
 
 @app.get("/weather/{user_id}")
 async def read_weather_request_progress(user_id: str):
-    return {"User ID": user_id}
+    current_weather_data = db.read_weather_request(user_id)
+    num_progress = current_weather_data[0][-1]
+    return {
+        "User ID": user_id,
+        "Progress": f'{((num_progress / TOTAL_CITIES) * 100):.2f}%'
+    }
