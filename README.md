@@ -15,17 +15,6 @@ To setup and execute database run:
 ```console
 docker run -d --name postgres-container -e TZ=UTC -p 30432:5432 -e POSTGRES_PASSWORD=<your-database-password> ubuntu/postgres:14-22.04_beta
 docker exec -i postgres-container /bin/bash -c "PGPASSWORD=<your-database-password> psql --username postgres postgres" < dump.sql
-docker run --hostname=65737bc08514 \
-    --mac-address=02:42:ac:11:00:02 \
-    --env=TZ=UTC \
-    --env=POSTGRES_PASSWORD=<your-database-password> \
-    --env=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/postgresql/14/bin \
-    --env=DEBIAN_FRONTEND=noninteractive \
-    --env=LANG=en_US.utf8 \
-    --env=PG_MAJOR=14 \
-    --env=PGDATA=/var/lib/postgresql/data \
-    --volume=/var/lib/postgresql/data \
-    -p 30432:5432 --restart=no --runtime=runc -d ubuntu/postgres:14-22.04_beta
 ```
 
 To build and execute the API run:
