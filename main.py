@@ -1,5 +1,6 @@
 import os
 import requests
+from time import sleep
 from dotenv import load_dotenv
 
 from fastapi import FastAPI, BackgroundTasks, HTTPException
@@ -60,14 +61,19 @@ async def root():
 
 @app.post("/weather/", status_code=201)
 async def create_weather_request(background_tasks: BackgroundTasks, user: User):
-    try:
-        weather_request_exists = db.weather_request_exists(user.user_id)
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500)
-
+    weather_request_exists = []
+    for i in range(1, 4):
+        try:
+            weather_request_exists = db.weather_request_exists(user.user_id)
+            if weather_request_exists:
+                return {'status': 'weather data for this user already exists'}
+            break
+        except Exception as e:
+            print(e)
+            sleep(5 * i)
+    
     if weather_request_exists:
-        return {'status': 'weather data for this user already exists'}
+        raise HTTPException(status_code=500)
     
     background_tasks.add_task(get_weather_data, user.user_id)
     
