@@ -34,8 +34,14 @@ def get_weather_data(user_id: str):
             citie_weather_data = {}
             citie_weather_data['city_id'] = city_id
             
-            url = f"https://api.openweathermap.org/data/2.5/weather?id={city_id}&appid={API_KEY}&units=metric"
-            response = requests.get(url)
+            for i in range(1, 4):
+                try:
+                    url = f"https://api.openweathermap.org/data/2.5/weather?id={city_id}&appid={API_KEY}&units=metric"
+                    response = requests.get(url)
+                    break
+                except Exception:
+                    print('Error in getting weather data, retrying soon...')
+                    sleep(60 * i)
             
             temprature = response.json()['main']['temp']
             humidity = response.json()['main']['humidity']
@@ -48,10 +54,9 @@ def get_weather_data(user_id: str):
         
         db.update_weather_request(user_id, cities_weather_data, num_cities, 'completed')
         print(f'Weather data for user {user_id} was successfully collected')
-    except Exception as e:
+    except Exception:
         db.update_weather_request(user_id, cities_weather_data, num_cities, 'failed')
         print(f'Weather data for user {user_id} was not completely collected')
-        print(e)
 
 
 @app.get("/")
