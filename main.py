@@ -44,8 +44,11 @@ def get_weather_data(user_id: str):
             cities_weather_data['cities'].append(citie_weather_data)
 
             db.update_weather_request(user_id, cities_weather_data, num_cities)
+        
+        db.update_weather_request(user_id, cities_weather_data, num_cities, 'completed')
         print(f'Weather data for user {user_id} was successfully collected')
     except Exception as e:
+        db.update_weather_request(user_id, cities_weather_data, num_cities, 'failed')
         print(f'Weather data for user {user_id} was not completely collected')
         print(e)
 

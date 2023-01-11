@@ -43,8 +43,8 @@ class DatabaseConnector:
         self.cursor.execute(query)
         return self.cursor.fetchall()[0][0]
 
-    def update_weather_request(self, user_id: str, weather_data: dict, num_progress: int):
+    def update_weather_request(self, user_id: str, weather_data: dict, num_progress: int, status: str = 'in_progress'):
         query =  f"UPDATE cities_weather_request SET cities_weather_data='{json.dumps(weather_data)}', "
-        query += f"num_progress={num_progress} WHERE user_id='{user_id}'"
+        query += f"num_progress={num_progress}, status='{status}' WHERE user_id='{user_id}'"
         self.cursor.execute(query)
         self.connection.commit()
